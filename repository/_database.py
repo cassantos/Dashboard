@@ -7,10 +7,18 @@ class Database:
     config = {
       'host': '127.0.0.1',
       'user': 'dashboard_user',
-      'password': 'dashpass',
+      'password': 'DashPass@2023',
       'database': 'dashboard_db',
       'raise_on_warnings': True
     }
+
+
+    #config = {
+    #  'host': '0.0.0.0',
+    #  'user': 'root',
+    #  'password': 'dashpass',
+    #  'database': 'dashboard_db'
+    #}
 
     conn: 0
 
