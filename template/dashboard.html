@@ -95,7 +95,7 @@
     <tr>
       <td width="25px" style="border:2px solid white;margin-left:-100px;white-space:nowrap;max-width:25px;
                  transform:rotate(270deg) translate(-200%,0px);text-align:right;">
-        {{ project.short_name }}
+        <strong>{{ project.short_name }}</strong> 
       </td>
       <td width="10px">&nbsp;</td>
       <td width="*" style="background-color:white;vertical-align:top;border:2px solid black;padding:5px;">
@@ -110,31 +110,31 @@
           <table style="font-size:10pt;">
             <tr>
               <td style="width:20px;border:1px solid black;background:{{ feature_status.color(feature_status.NOT_STARTED)[0] }}"></td>
-              <td>NÃO INICIADA</td>
+              <td>&nbspNÃO INICIADA</td>
             </tr>
             <tr>
               <td style="width:20px;border:1px solid black;border-top:0px;background:{{ feature_status.color(feature_status.UNDER_CONSTRUCTION)[0] }}"></td>
-              <td>EM CONSTRUÇÃO</td>
+              <td>&nbspEM CONSTRUÇÃO</td>
             </tr>
             <tr>
               <td style="width:20px;border:1px solid black;border-top:0px;background:{{ feature_status.color(feature_status.CONSTRUCTED)[0] }}"></td>
-              <td>CONCLUÍDA</td>
+              <td>&nbspCONCLUÍDA</td>
             </tr>
             <tr>
               <td style="width:20px;border:1px solid black;border-top:0px;background:{{ feature_status.color(feature_status.LATE)[0] }}"></td>
-              <td>ATRASADA</td>
+              <td>&nbspATRASADA</td>
             </tr>
             <tr>
               <td style="width:20px;border:1px solid black;border-top:0px;background:{{ feature_status.color(feature_status.TESTED)[0] }}"></td>
-              <td>TESTADA</td>
+              <td>&nbspTESTADA</td>
             </tr>
             <tr>
               <td style="width:20px;border:1px solid black;border-top:0px;background:{{ feature_status.color(feature_status.APPROVED)[0] }}"></td>
-              <td>APROVADA</td>
+              <td>&nbspAPROVADA</td>
             </tr>
             <tr>
               <td style="width:20px;border:1px solid black;border-top:0px;background:{{ feature_status.color(feature_status.CANCELED)[0] }}"></td>
-              <td>CANCELADA</td>
+              <td>&nbspCANCELADA</td>
             </tr>
           </table>
         </div>
@@ -146,7 +146,7 @@
   <div class="dash-container">
   {% for category in project.feature_categories %}
     <div class="dash-div">
-      {{ category.name }}
+      <strong>{{ category.name }}</strong> 
     </div>
     {% set counter = namespace(value = 0) %}
     {% for feature in category.features %}
@@ -158,16 +158,16 @@
     {% set counter.value = counter.value + 1 %}
       <div class="dash-content" style="background-color:{{feature_status.color(feature.status)[0]}};
                                        color:{{feature_status.color(feature.status)[1]}};">
-        <div style="height:12px;"></div>
+        <div style="height:13px;"></div>
         <strong>{{ feature.short_name }}</strong><br>
-        <div style="font-size:12px;text-transform:uppercase;height:50px;font-weight:bold;">{{ feature.name }}</div>
+        <div style="font-size:10px;text-transform:uppercase;height:50px;font-weight:bold;">{{ feature.name }}</div>
         <div style="font-size:12px;text-transform:uppercase;font-weight:bold;">{{ feature.status }}<br></div>
-        {{ feature.percent_done|round|int }}%<br>
+        <br>
         <div style="width:100%;height:30px;margin-top:5px;margin-bottom:5px;
                     border-top:2px solid black;border-bottom:2px solid black;
                     background-color:white;">
           <div style="width:{{ feature.percent_done|round|int }}%;height:26px;
-                      background-color:#00bb00;">&nbsp</div>
+                      background-color:#00bb00;"> <strong> {{ feature.percent_done|round|int }}% </strong></div>
         </div>
         <strong>{{ '&nbsp;'|safe if feature.estimated_end_date == '' else feature.estimated_end_date.strftime('%d/%m/%Y') }}</strong>
         <div style="height:3px;"></div>

@@ -32,6 +32,9 @@ trace("Database is connected!")
 user_service = UserService(database)
 project_service = ProjectService(database)
 
+@app.errorhandler(404) 
+def invalid_route(e): 
+    return "Invalid route."
 
 @app.route("/")
 def index():
@@ -207,8 +210,13 @@ def remove_user():
 
 
 def current_session_po_user():
-    user_id = session["user_id"]
-    user = user_service.find_user_by_id(user_id)
+    print( 'current_session_po_user', 'aqui agora')
+    try:
+        user_id = session["user_id"]
+        user = user_service.find_user_by_id(user_id)
+    except:
+        user = None
+
     if user is None:
         flash("Sessão Inválida.")
         return None
@@ -513,7 +521,9 @@ def remove_user_to_project(project_id):
 
 @app.route("/dashboard/<project_id>", methods=["GET"])
 def show_dashboard(project_id):
+    
     user = current_session_po_user()
+    print("/dashboard/<project_id>", user)
     if user is None:
         return redirect("/")
 
