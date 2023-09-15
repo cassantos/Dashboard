@@ -34,7 +34,7 @@ project_service = ProjectService(database)
 
 @app.errorhandler(404) 
 def invalid_route(e): 
-    return "Invalid route."
+    return render_template('notfoundpage.html') 
 
 @app.route("/")
 def index():
