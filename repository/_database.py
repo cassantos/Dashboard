@@ -12,14 +12,6 @@ class Database:
       'raise_on_warnings': True
     }
 
-
-    #config = {
-    #  'host': '0.0.0.0',
-    #  'user': 'root',
-    #  'password': 'dashpass',
-    #  'database': 'dashboard_db'
-    #}
-
     conn: 0
 
     def __init__(self):
