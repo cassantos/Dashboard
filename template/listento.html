@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Dashboard (Ouvindo você!)</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+</head>
+<body>
+
+    <div class="card text-center">
+        <div class="card-header">
+            <h1 class="display-3">Busca por voz</h1>
+        </div>
+        <div class="card-body width:50%">
+            <h5 class="card-title">Reconhecimento de Fala</h5>
+            <p class="card-text">Essa é uma demonstração simples de como utilizar o Speech Recognition 
+                               diretamente no Browser. Esse função é originalmente implementada no Google Chrome e 
+                               nos navegadores baseado no Cromium. Portanto, não irá funcionar no Firefox, por exemplo.</p>
+            <br>
+            <h5>Experimente dizer:</h5>
+            <p>'vá para o início'</p>
+            <p>'vá para projetos'</p>
+            <p>'abra o último dashboard'</p> 
+          
+            <button class="btn btn-warning btn-lg" id="speakbt" onclick="funcao1()">Clique para falar</button>
+            <div style="margin-top: 10px;" id="resultSpeak">Retorno</div>
+        </div>
+        <div class="card-footer text-muted">
+          
+        </div>
+        <br>
+        <br>
+        <br>
+
+        <a href="/home" class="btn btn-primary ">Home</a>
+      </div>
+
+
+    <!--div class="conteiner ">
+        <div class="container-fluid">
+            <h1 class="display-3 row align-items-center">Busca por voz</h1>
+        </div>
+        <div class="search">
+            <div class="d-grid gap-2 col-2 mx-auto">
+                <button class="btn btn-warning btn-lg" id="speakbt" onclick="funcao1()">Buscar</button>
+                <div style="margin-top: 10px;" id="resultSpeak">Retorno</div>
+            </div>
+        </div>
+    </div-->
+    <script async>
+        function funcao1()
+        {
+            var speakBtn = document.querySelector('#speakbt');
+            var resultSpeaker = document.querySelector('#resultSpeak');
+
+            if(window.SpeechRecognition || window.webkitSpeechRecognition){
+                var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+
+                var mySpeechRecognition = new SpeechRecognition();
+                mySpeechRecognition.lang = 'pt-BR';
+                
+                speakBtn.addEventListener('click', function(){
+                    try{
+                        mySpeechRecognition.start();
+                        resultSpeaker.innerHTML = "Estou te ouvindo";
+                    }catch(erro){
+                        alert('erro: ' + erro.message );
+                    }
+                }, false);
+
+                mySpeechRecognition.addEventListener('result', function(evt){
+                    var resultSpeak = evt.results[0][0].transcript;
+                    
+
+                    resultSpeaker.innerHTML = resultSpeak;
+                    resultSpeak = resultSpeak.replace(/[.!?,.]/g, "");
+                    console.log(resultSpeak)
+                    switch(resultSpeak.toLowerCase()){
+                        
+                        case 'clarear': 
+                            document.body.style.backgroundColor = '#33cc99';
+                            break;
+                        case 'escurecer':
+                            document.body.style.backgroundColor = '#047751';
+                            break;
+                        case 'escurecer ou clarear':
+                            document.body.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+                            ResultSpeaker.innerHTML = 'Fiquei confuso, então escolhi por conta própria';
+                            break;
+                        case 'clarear ou escurecer':
+                            document.body.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+                            ResultSpeaker.innerHTML = 'Fiquei confuso, então escolhi por conta própria';
+                            break;
+                        case 'vá para o início':
+                            window.location ='/home';
+                            break;
+                        case 'vá para projetos':
+                            window.location ='/projetos';
+                            break;
+                        case 'abra o último dashboard':
+                            window.location ='/dashboard/1';
+                            break;
+
+
+                    }
+
+                    if (resultSpeak.match(/buscar por/)){
+
+                        resultSpeaker.innerHTML = "Redirecionando...";
+                        setTimeout(function(){
+                            var resultado = resultSpeak.split('buscar por')
+                            window.location.href = 'https://www.gooble.com.br/search?q=' + resultado[1];
+                        })
+                    }
+                }, 2000);
+
+                mySpeechRecognition.addEventListener('error', function(evt){
+                    resultSpeaker.innerHTML = 'Se você disse alguma coisa, não ouvi muito bem!'
+                });
+
+                
+            }else{
+                resultSpeaker.innerHTML = "Seu navegador não suporta tanta tecnologia. Considere trocá-lo e tentar novamente.";
+            }
+        }
+    </script>
+</body>
+</html>

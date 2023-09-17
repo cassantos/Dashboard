@@ -42,6 +42,13 @@ def index():
         return redirect("/home")
     return render_template('index.html')
 
+###### TESTE #######
+@app.route("/voz")
+def listento():
+    if session.get("user_id"):
+        return render_template("listento.html")
+    return render_template('index.html')
+
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
