@@ -26,7 +26,8 @@ app.secret_key = "dashboard-secret-key-2023"
 trace("Application is running!")
 
 database = Database()
-database.connect()
+db_error = database.connect()
+trace(db_error)
 trace("Database is connected!")
 
 user_service = UserService(database)
@@ -217,7 +218,6 @@ def remove_user():
 
 
 def current_session_po_user():
-    print( 'current_session_po_user', 'aqui agora')
     try:
         user_id = session["user_id"]
         user = user_service.find_user_by_id(user_id)

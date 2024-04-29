@@ -15,12 +15,12 @@
             <h1 class="display-6">Busca por voz</h1>
         </div>
         <div class="card-body width:50%">
-            <h5 class="card-title">Reconhecimento de Fala</h5>
+            <h5 class="card-title">[Escutando o tempo todo] Reconhecimento de Fala</h5>
             <p class="card-text">Essa é uma demonstração simples de como utilizar o Speech Recognition 
                                diretamente no Browser. Esse função é originalmente implementada no Google Chrome e 
                                nos navegadores baseado no Cromium. Portanto, não irá funcionar no Firefox, por exemplo.</p>
             <br>
-            <h5>Experimente dizer:</h5>
+            <h5>Experimente dizer um dos comandos abaixo, sempre começando por 'MyDash':</h5>
             <p>'vá para o início'</p>
             <p>'vá para projetos'</p>
             <p>'abra o último dashboard'</p> 
@@ -28,11 +28,6 @@
             <button class="btn btn-warning btn-lg" id="speakbt" onclick="testeSpeechRecognition()">Clique para falar</button>
             <div style="margin-top: 10px;" id="resultSpeak">Retorno</div>
         </div>
-        <h1>chamando...</h1>
-
-        <!-- Remover -->
-        <!--script> testeSpeechRecognition();</script>
-
         <div class="card-footer text-muted">
           
         </div>
@@ -51,40 +46,7 @@
             </div>
         </div>
     </div-->
-    <script async >
-        
-        class Projects{
-            constructor(){
-                this.lastProjectsControl = {'last': null, 'penultimate': null, 'antepenultimate': null};
-            }
-
-            setLastProjects(projectID){
-            
-                if (localStorage.hasOwnProperty('last3projects')){
-                this.lastProjectsControl = JSON.parse(localStorage.getItem('last3projects'));
-                this.lastProjectsControl['antepenultimate'] = this.lastProjectsControl['penultimate'];
-                this.lastProjectsControl['penultimate'] = this.lastProjectsControl['last'];
-                }
-                this.lastProjectsControl['last'] = parseInt(projectID);
-                localStorage.setItem('last3projects', JSON.stringify(this.lastProjectsControl));
-            }
-
-            getLastProject(){
-                this.lastProjectsControl = JSON.parse(localStorage.getItem('last3projects'));
-                return this.lastProjectsControl['last'];
-            }
-
-            getPenultimateProject(){
-                this.lastProjectsControl = JSON.parse(localStorage.getItem('last3projects'));
-                return this.lastProjectsControl['penultimate'];
-            }
-
-            getAntepenultimateProject(){
-                this.lastProjectsControl = JSON.parse(localStorage.getItem('last3projects'));
-                return this.lastProjectsControl['antepenultimate'];
-            }
-        }  
-        
+    <script async>
         function testeSpeechRecognition()
         {
             var speakBtn = document.querySelector('#speakbt');
@@ -94,50 +56,43 @@
                 var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
 
                 var mySpeechRecognition = new SpeechRecognition();
-
-                /*-------*/
-                mySpeechRecognition.addEventListener("error", (event) => {
-                    console.error(`Speech recognition error detectado: ${event.error}`);
-                });
-                /*-------*/
                 mySpeechRecognition.lang = 'pt-BR';
                 
-                function startSpeechRecognition(){
+                try{
+                    mySpeechRecognition.start();
+                    resultSpeaker.innerHTML = "Estou te ouvindo";
+                }catch(erro){
+                    alert('erro: ' + erro.message );
+                }
+                
+                speakBtn.addEventListener('click', function(){
                     try{
                         mySpeechRecognition.start();
-                        
                         resultSpeaker.innerHTML = "Estou te ouvindo";
-                        window.clearInterval();
                     }catch(erro){
-                        console.log('erro: ' + erro.message );
+                        alert('erro: ' + erro.message );
                     }
-                }
-                startSpeechRecognition();
-
+                }, false);
+                
                 mySpeechRecognition.addEventListener('result', function(evt){
                     var resultSpeak = evt.results[0][0].transcript;
-                    var recentProjects = new Projects();
 
                     resultSpeaker.innerHTML = resultSpeak;
                     resultSpeak = resultSpeak.replace(/[.!?,.]/g, "");
                     console.log(resultSpeak.toLowerCase())
                     switch(resultSpeak.toLowerCase()){
                         
-
                         case 'vá para o início':
                             window.location ='/home';
+                            console.log('Vá para Home')
                             break;
                         case 'vá para projetos':
                             window.location ='/projetos';
+                            console.log('Vá para projetos')
                             break;
                         case 'abra o último dashboard':
-                            window.location ='/dashboard/' + recentProjects.getLastProject();
-                            break;
-                        case 'abra o penúltimo dashboard': 
-                            window.location ='/dashboard/' + recentProjects.getPenultimateProject();
-                            break;
-                        case 'abra o antepenúltimo dashboard': 
-                            window.location ='/dashboard/' + recentProjects.getAntepenultimateProject();
+                            window.location ='/dashboard/1';
+                            console.log('Vá para Dashboard 1')
                             break;
                     }
 
@@ -155,23 +110,101 @@
                     resultSpeaker.innerHTML = 'Se você disse alguma coisa, não ouvi muito bem!'
                 });
 
-                /////
-                setInterval(myTimer, 4000);
-
-                function myTimer() {
-                    console.log('myTimer');
-                    resultSpeaker.innerHTML = '---';
-                    mySpeechRecognition.stop();
-                    startSpeechRecognition();
-                    //testeSpeechRecognition()
-                }
-                ////
+                
             }else{
                 resultSpeaker.innerHTML = "Seu navegador não suporta tanta tecnologia. Considere trocá-lo e tentar novamente.";
             }
         }
+    
+    </script>
+    <script>
+        function iAmListening(){
+
+            const magic_word = 'My Dash';
+
+            // initialize our SpeechRecognition object
+            let recognition = new webkitSpeechRecognition();
+            recognition.lang = 'pt-BR';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+            recognition.continuous = true;
+
+            // detect the magic word
+            recognition.onresult = e => {
+                // extract all the transcripts
+                var transcripts  = [].concat.apply([], [...e.results]
+                .map(res => [...res]
+                    .map(alt => alt.transcript)
+                )
+                );
+                if(transcripts.some(t => t.indexOf(magic_word) > -1)){
+                    //do something awesome, like starting your own command listeners
+                    alert('Olha o que eu ouvi: '+transcripts);
+                }
+                else{
+                    // didn't understood...
+                    console.log('Não entendi...');
+                }
+            }
+            // called when we detect silence
+            function stopSpeech(){
+                recognition.stop();
+                console.log("Parou de ouvir...");
+            }
+            // called when we detect sound
+            function startSpeech(){
+                try{ // calling it twice will throw...
+                    recognition.start();
+                    console.log("Começou a ouvir...");
+                }
+                catch(e){}
+            }
+            // request a LocalMediaStream
+            navigator.mediaDevices.getUserMedia({audio:true})
+            // add our listeners
+            .then(stream => detectSilence(stream, stopSpeech, startSpeech))
+            .catch(e => log(e.message));
 
 
+            function detectSilence(
+            stream,
+            onSoundEnd = _=>{},
+            onSoundStart = _=>{},
+            silence_delay = 500,
+            min_decibels = -80
+            ) {
+                console.log('Detectou silêncio');
+                const ctx = new AudioContext();
+                const analyser = ctx.createAnalyser();
+                const streamNode = ctx.createMediaStreamSource(stream);
+                streamNode.connect(analyser);
+                analyser.minDecibels = min_decibels;
+
+                const data = new Uint8Array(analyser.frequencyBinCount); // will hold our data
+                let silence_start = performance.now();
+                let triggered = false; // trigger only once per silence event
+
+                function loop(time) {
+                    testeSpeechRecognition();
+                    requestAnimationFrame(loop); // we'll loop every 60th of a second to check
+                    analyser.getByteFrequencyData(data); // get current data
+                    if (data.some(v => v)) { // if there is data above the given db limit
+                        if(triggered){
+                            triggered = false;
+                            onSoundStart();
+                        }
+                        silence_start = time; // set it to now
+                    }
+                    if (!triggered && time - silence_start > silence_delay) {
+                        onSoundEnd();
+                        triggered = true;
+                    }
+                }
+
+                loop();
+            }
+        }
+        iAmListening();
     </script>
 </body>
 </html>

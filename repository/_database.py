@@ -6,8 +6,10 @@ class Database:
 
     config = {
       'host': '127.0.0.1',
-      'user': 'dashboard_user',
-      'password': 'DashPass@2023',
+      #'user': 'dashboard_user',
+      #'password': 'DashPass@2023',
+      'user': 'root',
+      'password': 'dashpass',
       'database': 'dashboard_db',
       'raise_on_warnings': True
     }
@@ -27,6 +29,7 @@ class Database:
               print("ERROR: Dashboard Database does not exist.")
             else:
               print("ERROR: {}", err)
+            return err # Guto
 
     def test(self):
         cursor = self.conn.cursor()

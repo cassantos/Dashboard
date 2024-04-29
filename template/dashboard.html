@@ -4,6 +4,9 @@
   <title>Dashboard</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Babel-->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Boostrap -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
@@ -60,7 +63,7 @@
           <a class="dropdown-item" href="#">Nenhum projeto disponível</a>
         {% else %}
           {% for project in granted_projects %}
-          <a class="dropdown-item" href="/dashboard/{{ project.id }}">{{ project.short_name }}</a>
+          <a id="selectProject" onclick="testeSpeechRecognition()" class="dropdown-item" href="/dashboard/{{ project.id }}">{{ project.short_name }}</a>
           {% endfor %}
         {% endif %}
         </div>
@@ -97,13 +100,23 @@
                  transform:rotate(270deg) translate(-200%,0px);text-align:right;">
         <strong>{{ project.short_name }}</strong> 
       </td>
+
       <td width="10px">&nbsp;</td>
       <td width="*" style="background-color:white;vertical-align:top;border:2px solid black;padding:5px;">
-        <h4>{{ project.name }}</h4>
-            {% autoescape false %}
-            {{ project.description|replace('\r\n', '<br>') }}
-            {% endautoescape %}
-      </td>
+        
+        <div class="container mt-4">
+          <div class="d-flex justify-content-between">
+            <h4>{{ project.name }} </h4>
+            <button class="btn btn btn-light btn-sm" id="speakbt" onclick="testeSpeechRecognition()">⚪️</button>
+          </div>
+          {% autoescape false %}
+          {{ project.description|replace('\r\n', '<br>') }}
+          {% endautoescape %}
+        </div>
+
+
+            
+
       <td width="10px">&nbsp;</td>
       <td width="150px" style="vertical-align:top;">
         <div style="float:right;margin:0px 0px 0px 0px;width:150px;">
@@ -145,7 +158,7 @@
 
   <div class="dash-container">
   {% for category in project.feature_categories %}
-    <div class="dash-div">
+    <div class="dash-div" >
       <strong>{{ category.name }}</strong> 
     </div>
     {% set counter = namespace(value = 0) %}
@@ -153,15 +166,15 @@
     {% if counter.value == 0 %}
     <div class="dash-card dash-card1">
     {% else %}
-    <div class="dash-card dash-cardn">
+    <div  class="dash-card dash-cardn">
     {% endif %}
     {% set counter.value = counter.value + 1 %}
-      <div class="dash-content" style="background-color:{{feature_status.color(feature.status)[0]}};
+      <div id="{{ feature.short_name }}" class="dash-content"  style="background-color:{{feature_status.color(feature.status)[0]}};
                                        color:{{feature_status.color(feature.status)[1]}};">
         <div style="height:13px;"></div>
-        <strong>{{ feature.short_name }}</strong><br>
-        <div style="font-size:10px;text-transform:uppercase;height:50px;font-weight:bold;">{{ feature.name }}</div>
-        <div style="font-size:12px;text-transform:uppercase;font-weight:bold;">{{ feature.status }}<br></div>
+        <strong class = "shortname">{{ feature.short_name }}</strong><br>
+        <div class="clssFeature" style="font-size:10px;text-transform:uppercase;height:50px;font-weight:bold;">{{ feature.name }}</div>
+        <div class ="clssFeatureStatus" style="font-size:12px;text-transform:uppercase;font-weight:bold;">{{ feature.status }}<br></div>
         <br>
         <div style="width:100%;height:30px;margin-top:5px;margin-bottom:5px;
                     border-top:2px solid black;border-bottom:2px solid black;
@@ -176,7 +189,225 @@
     {% endfor %}
   {% endfor %}
   </div>
+  <script async type="text/babel">
+    class Projects{
+      constructor(){
+        this.lastProjectsControl = {'last': null, 'penultimate': null, 'antepenultimate': null};
+      }
 
+      setLastProjects(projectID){
+      
+        if (localStorage.hasOwnProperty('last3projects')){
+          this.lastProjectsControl = JSON.parse(localStorage.getItem('last3projects'));
+          this.lastProjectsControl['antepenultimate'] = this.lastProjectsControl['penultimate'];
+          this.lastProjectsControl['penultimate'] = this.lastProjectsControl['last'];
+        }
+        this.lastProjectsControl['last'] = parseInt(projectID);
+        localStorage.setItem('last3projects', JSON.stringify(this.lastProjectsControl));
+      }
+
+      getLastProject(){
+        this.lastProjectsControl = JSON.parse(localStorage.getItem('last3projects'));
+        return this.lastProjectsControl['last'];
+      }
+
+      getPenultimateProject(){
+        this.lastProjectsControl = JSON.parse(localStorage.getItem('last3projects'));
+        return this.lastProjectsControl['penultimate'];
+      }
+
+      getAntepenultimateProject(){
+        this.lastProjectsControl = JSON.parse(localStorage.getItem('last3projects'));
+        return this.lastProjectsControl['antepenultimate'];
+      }
+    }
+    
+    function recoverLast3Projects()
+    {
+      var projectSelected = window.location.href; //document.getElementById('selectProject');
+      var urlAtual = window.location.href;
+      var recentProjects = new Projects();
+      let projectNumber = 0;
+
+      projectSelected = encodeURI(projectSelected);
+      var position = projectSelected.lastIndexOf("/") + 1;
+      var length = projectSelected.length; 
+      console.log('position ' + position);
+      console.log('length '+ length);
+      projectNumber = projectSelected.substring(position, length);
+      console.log('O projeto acessado é: ' + projectNumber);
+      recentProjects.setLastProjects(projectNumber);
+
+    }
+      
+    recoverLast3Projects();
+    function testeSpeechRecognition()
+        {
+            var speakBtn = document.querySelector('#speakbt');
+            
+            if(window.SpeechRecognition || window.webkitSpeechRecognition){
+                var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+
+                var mySpeechRecognition = new SpeechRecognition();
+                var resultSpeak = "";
+
+                /*Error handler*/
+                mySpeechRecognition.addEventListener("error", (event) => {
+                    console.log('Speech recognition error detected');
+                    console.log(event.error);
+                });
+                /*-------*/
+                mySpeechRecognition.lang = 'pt-BR';
+                
+                function startSpeechRecognition(){
+                    try{
+                        mySpeechRecognition.start();
+                        
+                        window.document.getElementById("speakbt").innerHTML = "🟠"
+                        window.clearInterval();
+                    }catch(erro){
+                        console.log('erro: ' );
+                        console.log(erro.message);
+                        window.document.getElementById("speakbt").innerHTML = "⚪️"
+                    }
+                }
+                startSpeechRecognition();
+
+                mySpeechRecognition.addEventListener('result', function(evt){
+                    var resultSpeak = evt.results[0][0].transcript;
+                    
+                    var recentProjects = new Projects();
+
+                    // Remove any unexpected characteres 
+                    resultSpeak = resultSpeak.replace(/[.!?,.]/g, "");
+                    
+                    const voiceCommand = resultSpeak.toLowerCase().split(" ");
+
+                    var updFeature, updStatus, preposition = "";
+
+                    const optStatus = [ 'NÃO INICIADA',
+                                        'CONSTRUÇÃO',
+                                        'CONCLUÍDA',
+                                        'ATRASADA',
+                                        'TESTADA',
+                                        'APROVADA',
+                                        'CANCELADA'];
+                    
+
+                    var whereFeatureNameEnds = 100;
+                    var commandIsComplete = false;
+                    var featureName = '';
+
+                    //alert('voiceCommand: ' + voiceCommand);
+                    //alert('voiceCommand.indexOf("para", 0): ' + voiceCommand.indexOf('para',0));
+                    // Checks user want to change a status and if the status is a valid one
+                    if (voiceCommand[0] == 'mudar'){
+                      whereFeatureNameEnds = voiceCommand.indexOf('para',0); // The preposistion indicates de end of feature name
+                      commandIsComplete = whereFeatureNameEnds != -1;
+
+                      voiceCommand.forEach(function(featurePart, index){
+                        //mudar relatório final para atrasada
+                        if (index > 0 && index < whereFeatureNameEnds){
+                          featureName += voiceCommand[index];
+                          if (index + 1 < whereFeatureNameEnds){
+                            featureName += ' ';
+                          }
+                        }
+                      })
+                    }  
+
+                    //alert('Verbo ' + voiceCommand[0]);
+                    //alert('Onde está o "para" ' + whereFeatureNameEnds);      
+                    //alert(commandIsComplete);
+                    //alert(" Nome da Feature: " + featureName);
+
+                    if (commandIsComplete){
+
+                       
+                      const stdCardColors = ['{{ feature_status.color(feature_status.NOT_STARTED)[0] }}',
+                                             '{{ feature_status.color(feature_status.UNDER_CONSTRUCTION)[0] }}',
+                                             '{{ feature_status.color(feature_status.CONSTRUCTED)[0] }}',
+                                             '{{ feature_status.color(feature_status.LATE)[0] }}',
+                                             '{{ feature_status.color(feature_status.TESTED)[0] }}',
+                                             '{{ feature_status.color(feature_status.APPROVED)[0] }}',
+                                             '{{ feature_status.color(feature_status.CANCELED)[0] }}']
+
+                      updFeature = featureName; 
+                      //alert('updFeature ' + updFeature);
+
+                      updStatus = voiceCommand[whereFeatureNameEnds + 1 ].toUpperCase();
+
+                      /* Checks witch is the status order in the the status list to determine the correct  
+                         background color to be applied to the card after the status change */
+                      var statusIndex = optStatus.indexOf(updStatus, 0)
+
+                      updFeature = featureName.toUpperCase();
+                      updStatus  = updStatus.toUpperCase();
+                      //alert('Feature: '+updFeature);
+                      //alert('Status: '+updStatus);
+
+                      var allFeatures = document.getElementsByClassName("clssFeature");
+                      var allStatus   = document.getElementsByClassName("clssFeatureStatus");
+                      var allFeratureShortName = document.getElementsByClassName("shortname");
+
+                      //alert('allFeatures' + allFeatures );
+                      //alert('allStatus' + allStatus );
+                      
+
+                      for (var i = 0; i < allFeatures.length; i++) {
+                        if (allFeatures[i].innerHTML.toUpperCase() == updFeature){
+                          //alert(allFeatures[i].innerHTML);
+                          
+                          allStatus[i].innerHTML = updStatus;
+                          //alert('Agorar trocar para: '+ updStatus);
+                          //alert('allFeratureShortName' + allFeratureShortName[i].innerHTML );
+                          document.getElementById(allFeratureShortName[i].innerHTML).style.backgroundColor = stdCardColors[statusIndex];
+                        }else{
+                          //alert('Não encontrou |'+ updFeature + "| <> |"+allFeatures[i].innerHTML.toUpperCase()+"|");
+                        }
+                      }
+                    }else{
+
+                      switch(resultSpeak.toLowerCase()){
+
+                          case 'vá para o início':
+                              window.location ='/home';
+                              break;
+                          case 'vá para projetos':
+                              window.location ='/projetos';
+                              break;
+                          case 'abra o último dashboard':
+                              window.location ='/dashboard/' + recentProjects.getLastProject();
+                              break;
+                          case 'abra o penúltimo dashboard': 
+                              window.location ='/dashboard/' + recentProjects.getPenultimateProject();
+                              break;
+                          case 'abra o antepenúltimo dashboard': 
+                              window.location ='/dashboard/' + recentProjects.getAntepenultimateProject();
+                              break;
+                          
+                      }
+                    }  
+                }, 2000);
+
+                mySpeechRecognition.addEventListener('error', function(evt){
+                  console.log( 'Se você disse alguma coisa, não ouvi muito bem!');
+                });
+
+                /////
+                setInterval(myTimer, 5000);
+
+                function myTimer() {
+                    mySpeechRecognition.stop();
+                    startSpeechRecognition();
+                    //testeSpeechRecognition()
+                }
+                ////
+            }else{
+                alert("Seu navegador não suporta tanta tecnologia. Considere trocá-lo e tentar novamente.");
+            }
+        }
+  </script>
 </body>
 </html>
 

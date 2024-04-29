@@ -22,7 +22,7 @@ class FeatureStatus:
         if status == cls.UNDER_CONSTRUCTION:
             return "#ffff00", "#000000"
         if status == cls.LATE:
-            return "#ff0000", "#FFE4E1"; #"#D8BFD8"; 
+            return "#ff0000", "#000000"; 
         if status == cls.CONSTRUCTED:
             return "#00ffff", "#000000";
         if status == cls.TESTED:
